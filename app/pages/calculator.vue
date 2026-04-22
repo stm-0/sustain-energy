@@ -76,8 +76,7 @@ const score = computed(() =>
 const allComplete = computed(() => completed.value === criteria.length)
 
 const submitted = ref(false)
-const showResetModal = ref(false)
-const showClearModal = ref(false)
+const isSave = ref(false) // TODO: check if there is previous save, to display btn
 
 const handleSubmit = () => {
   if (!allComplete.value) return
@@ -88,14 +87,12 @@ const handleSubmit = () => {
 const clearAll = () => {
   selections.value = Array(criteria.length).fill(null)
   submitted.value = false
-  showClearModal.value = false
 }
 
 const resetToLast = () => {
   // TODO: Simulate restoring last saved state
   selections.value = Array(criteria.length).fill(null)
   submitted.value = false
-  showResetModal.value = false
 }
 </script>
 
@@ -206,7 +203,7 @@ const resetToLast = () => {
             </UiAlertDialog>
 
             <!-- Restore last answers -->
-            <UiAlertDialog>
+            <UiAlertDialog v-if="isSave">
               <UiAlertDialogTrigger as-child>
                 <UiButton variant="secondary">
                   <Icon name="ph:arrow-counter-clockwise-bold" size="18" />

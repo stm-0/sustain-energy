@@ -3,8 +3,14 @@ import tailwindcss from "@tailwindcss/vite"
 export default defineNuxtConfig({
   compatibilityDate: "2025-01-01",
   css: ["~/assets/css/fonts.css", "~/assets/css/tailwind.css"],
+  routeRules: {
+    "/auth/**": { appLayout: "auth" },
+  },
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ["@vueuse/core"],
+    },
   },
   modules: ["shadcn-nuxt", "@nuxt/icon", "@nuxt/image", "@nuxtjs/supabase"],
   shadcn: {
@@ -32,7 +38,7 @@ export default defineNuxtConfig({
   },
   supabase: {
     redirectOptions: {
-      login: "/login",
+      login: "/auth/login",
       callback: "/confirm",
       include: undefined,
       exclude: ["/", "/about", "/calculator"], // TODO: change before production

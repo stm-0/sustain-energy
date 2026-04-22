@@ -27,7 +27,7 @@ const visibleLinks = computed(() =>
   navLinks.filter((l) => !l.auth || isLoggedIn.value),
 )
 
-const isActive = (path: string) => {
+const isActive = (path: string): boolean => {
   if (path === "/") return route.path === "/"
   return route.path.startsWith(path)
 }
@@ -40,17 +40,7 @@ const isActive = (path: string) => {
     <div
       class="relative container flex h-full items-center justify-between gap-6"
     >
-      <!-- Logo -->
-      <NuxtLink to="/" class="flex shrink-0 items-center gap-2.5">
-        <div
-          class="bg-accent flex size-8 items-center justify-center rounded-full"
-        >
-          <Icon name="ph:leaf-bold" size="18" class="text-white" />
-        </div>
-        <span class="font-heading hidden text-xl font-bold sm:block">
-          Sustain<span class="text-primary">Energy</span>
-        </span>
-      </NuxtLink>
+      <Logo />
 
       <!-- Desktop Nav Links -->
       <nav
@@ -75,7 +65,7 @@ const isActive = (path: string) => {
       <div class="hidden items-center gap-3 lg:flex">
         <UiButton as-child>
           <!-- TODO: Redirect person from login page to dashboard if user authorised -->
-          <NuxtLink to="/login" class="font-heading">
+          <NuxtLink to="/auth/login" class="font-heading">
             Get Started
             <Icon name="ph:arrow-right" :size="20" class="text-white" />
           </NuxtLink>
