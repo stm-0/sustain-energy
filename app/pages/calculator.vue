@@ -261,37 +261,5 @@ const resetToLast = () => {
         @download="console.log('download')"
       />
     </div>
-
-    <!-- Clear modal -->
-    <!-- <AppModal v-model="showClearModal" title="Clear All Answers?" size="sm">
-      <p class="font-body text-sm" style="color: var(--color-body)">
-        This will reset all {{ criteria.length }} criteria selections. Are you
-        sure?
-      </p>
-      <template #footer>
-        <UiButton variant="secondary" size="sm" @click="showClearModal = false"
-          >Cancel</UiButton
-        >
-        <UiButton variant="destructive" size="sm" @click="clearAll"
-          >Clear All</UiButton
-        >
-      </template>
-    </AppModal> -->
-
-    <!-- Reset modal -->
-    <!-- <AppModal v-model="showResetModal" title="Reset to Last Saved?" size="sm">
-      <p class="font-body text-sm" style="color: var(--color-body)">
-        This will restore your last saved calculator state from the database.
-      </p>
-      <template #footer>
-        <UiButton variant="secondary" size="sm" @click="showResetModal = false"
-          >Cancel</UiButton
-        >
-        <UiButton size="sm" @click="resetToLast">
-          <Icon name="ph:arrow-counter-clockwise-bold" size="14" />
-          Reset
-        </UiButton>
-      </template>
-    </AppModal> -->
   </section>
 </template>
