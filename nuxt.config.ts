@@ -1,0 +1,42 @@
+import tailwindcss from "@tailwindcss/vite"
+
+export default defineNuxtConfig({
+  compatibilityDate: "2025-01-01",
+  css: ["~/assets/css/fonts.css", "~/assets/css/tailwind.css"],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+  modules: ["shadcn-nuxt", "@nuxt/icon", "@nuxt/image", "@nuxtjs/supabase"],
+  shadcn: {
+    prefix: "Ui",
+    componentDir: "@/components/ui",
+  },
+  icon: {
+    mode: "css",
+    cssLayer: "base",
+    serverBundle: {
+      collections: ["ph"],
+    },
+  },
+  image: {
+    quality: 85,
+    format: ["webp", "jpeg"],
+    screens: {
+      xs: 375,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      "2xl": 1536,
+    },
+  },
+  supabase: {
+    redirectOptions: {
+      login: "/login",
+      callback: "/confirm",
+      include: undefined,
+      exclude: ["/", "/about", "/calculator"], // TODO: change before production
+      saveRedirectToCookie: false,
+    },
+  },
+})
