@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { CertificateLevel } from "~/types/app.types"
+
 interface Props {
-  level: "green" | "amber" | "red"
+  level: CertificateLevel
   companyName?: string
   score?: number
   year?: number
@@ -14,30 +16,40 @@ const props = withDefaults(defineProps<Props>(), {
   compact: false,
 })
 
+interface CertificateOption {
+  icon: string
+  label: string
+  sub: string
+  cardClass: string
+  iconColor: string
+  scoreColor: string
+}
+
+//! FIXME: Fix colors
 const options = {
-  green: {
+  gold: {
     icon: "ph:leaf-fill",
     label: "GREEN CERTIFIED",
     sub: "Sustainability Target Achieved",
-    cardClass: "bg-primary/20 border-primary",
-    iconColor: "var(--color-primary)",
-    scoreColor: "var(--color-primary)",
+    cardClass: "#fcc80033 border-primary",
+    iconColor: "#fcc800",
+    scoreColor: "#fcc800",
   },
-  amber: {
+  silver: {
     icon: "ph:warning-circle-bold",
     label: "AMBER LEVEL",
     sub: "Approaching Sustainability Target",
-    cardClass: "bg-score-amber/20 border-score-amber",
-    iconColor: "var(--color-score-amber)",
-    scoreColor: "#92400E",
+    cardClass: "#d4d4d833 border-score-amber",
+    iconColor: "#d4d4d8",
+    scoreColor: "#d4d4d8",
   },
-  red: {
+  bronze: {
     icon: "ph:x-circle-bold",
     label: "REQUIRES ACTION",
     sub: "Below Sustainability Target",
-    cardClass: "bg-score-red/20 border-score-red",
-    iconColor: "var(--color-score-red)",
-    scoreColor: "#991B1B",
+    cardClass: "#7e2a0c33 border-score-red",
+    iconColor: "#7e2a0c",
+    scoreColor: "#7e2a0c",
   },
 }
 
@@ -62,7 +74,7 @@ const config = computed(() => options[props.level])
     <!-- Top accent bar -->
     <div
       class="absolute top-0 right-0 left-0 h-1.5 rounded-t-sm"
-      :style="`background-color: ${config.iconColor};`"
+      :style="`background: ${config.iconColor};`"
     />
 
     <Icon

@@ -9,26 +9,22 @@ const props = withDefaults(defineProps<Props>(), {
   total: 10,
 })
 
-const level = computed<"green" | "amber" | "red">(() => {
-  if (props.score >= 70) return "green"
-  if (props.score >= 40) return "amber"
-  return "red"
-})
+const level = computed(() => calcCertifiacteLevel(props.score))
 
 const levelConfig = computed(
   () =>
     ({
-      green: {
+      gold: {
         label: "Green Level",
         color: "text-primary",
         bg: "bg-primary/20",
       },
-      amber: {
+      silver: {
         label: "Amber Level",
         color: "text-score-amber",
         bg: "bg-score-amber/20",
       },
-      red: {
+      bronze: {
         label: "Red Level",
         color: "text-score-red",
         bg: "bg-score-red/20",
@@ -79,9 +75,9 @@ const shortfall = computed(() => Math.max(0, 70 - props.score))
         <UiBadge variant="ghost">
           <Icon
             :name="
-              level === 'green'
+              level === 'gold'
                 ? 'ph:leaf-bold'
-                : level === 'amber'
+                : level === 'silver'
                   ? 'ph:warning-circle-bold'
                   : 'ph:x-circle-bold'
             "

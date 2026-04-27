@@ -10,11 +10,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{ download: []; buyVouchers: [] }>()
 
-const level = computed<"green" | "amber" | "red">(() => {
-  if (props.score >= 70) return "green"
-  if (props.score >= 40) return "amber"
-  return "red"
-})
+const level = computed(() => calcCertifiacteLevel(props.score))
 
 const shortfall = computed(() => Math.max(0, 70 - props.score))
 const vouchersNeeded = computed(() => shortfall.value)

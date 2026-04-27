@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-01-01",
   css: ["~/assets/css/fonts.css", "~/assets/css/tailwind.css"],
   routeRules: {
+    "/": { prerender: true },
+    "/about": { prerender: true },
     "/auth/**": { appLayout: "auth" },
   },
   vite: {
@@ -12,7 +14,13 @@ export default defineNuxtConfig({
       include: ["@vueuse/core"],
     },
   },
-  modules: ["shadcn-nuxt", "@nuxt/icon", "@nuxt/image", "@nuxtjs/supabase"],
+  modules: [
+    "shadcn-nuxt",
+    "@nuxt/icon",
+    "@nuxt/image",
+    "@nuxtjs/supabase",
+    "@pinia/nuxt",
+  ],
   shadcn: {
     prefix: "Ui",
     componentDir: "@/components/ui",
@@ -45,4 +53,5 @@ export default defineNuxtConfig({
       saveRedirectToCookie: false,
     },
   },
+  pinia: {},
 })

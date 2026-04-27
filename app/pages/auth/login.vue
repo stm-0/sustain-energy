@@ -1,6 +1,8 @@
 <script setup lang="ts">
 useHead({ title: "Log In – Sustain Energy" })
 
+const client = useSupabaseClient()
+
 const form = reactive({ email: "", password: "" })
 const errors = reactive<Record<string, string>>({})
 const loginError = ref("")
@@ -19,8 +21,20 @@ const handleSubmit = async () => {
   loginError.value = ""
   if (!validate()) return
   loading.value = true
-  await new Promise((r) => setTimeout(r, 1000))
-  loading.value = false
+
+  const { data, error } = await client.auth.signInWithPassword({
+    email: "",
+    password: "",
+  })
+
+  if (data.user || error) {
+    loading.value = true
+  }
+  if (error) {
+    loginError.value = error.message
+  }
+  
+
   // Demo: simulate wrong credentials
   loginError.value = "Incorrect email or password. Please try again."
 }
@@ -69,6 +83,7 @@ const handleSubmit = async () => {
               name="email"
               required
               autocomplete="email"
+              class="placeholder:text-sm"
             />
             <UiInputGroupAddon align="inline-start">
               <Icon name="ph:envelope-simple-open-bold" />
