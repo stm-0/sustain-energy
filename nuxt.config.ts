@@ -6,12 +6,19 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { prerender: true },
     "/about": { prerender: true },
+    "/privacy": { prerender: true },
     "/auth/**": { appLayout: "auth" },
   },
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ["@vueuse/core"],
+      include: [
+        "@vueuse/core",
+        "class-variance-authority",
+        "reka-ui",
+        "clsx",
+        "tailwind-merge",
+      ],
     },
   },
   modules: [
@@ -20,6 +27,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxtjs/supabase",
     "@pinia/nuxt",
+    "motion-v/nuxt",
   ],
   shadcn: {
     prefix: "Ui",
@@ -49,9 +57,20 @@ export default defineNuxtConfig({
       login: "/auth/login",
       callback: "/confirm",
       include: undefined,
-      exclude: ["/", "/about", "/calculator"], // TODO: change before production
+      exclude: ["/", "/about", "/calculator", "/privacy", "/terms"], // TODO: change before production
       saveRedirectToCookie: false,
     },
   },
   pinia: {},
+  motionV: {
+    directives: true,
+    presets: {
+      "fade-up": {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        transition: { duration: 0.5, type: "spring" },
+        inViewOptions: { once: true },
+      },
+    },
+  },
 })

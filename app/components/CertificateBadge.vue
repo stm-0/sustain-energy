@@ -25,7 +25,7 @@ interface CertificateOption {
   scoreColor: string
 }
 
-//! FIXME: Fix colors
+// FIXME: Fix colors
 const options = {
   gold: {
     icon: "ph:leaf-fill",
