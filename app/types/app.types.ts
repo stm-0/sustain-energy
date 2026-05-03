@@ -93,3 +93,28 @@ export const measurements: MeasurementItem[] = [
 ] as const
 
 export type CertificateLevel = "bronze" | "silver" | "gold"
+
+export const certificateStyles = {
+  bronze: {
+    icon: "ph:x-circle-bold",
+    cardClass: "bg-certificate-bronze/20 border-certificate-bronze",
+    textClass: "text-certificate-bronze",
+  },
+  silver: {
+    icon: "ph:warning-circle-bold",
+    cardClass: "bg-certificate-silver/20 border-certificate-silver",
+    textClass: "text-certificate-silver",
+  },
+  gold: {
+    icon: "ph:leaf-fill",
+    cardClass: "bg-certificate-gold/20 border-certificate-gold",
+    textClass: "text-certificate-gold",
+  },
+} as const
+
+export interface UserCompany {
+  id: number
+  join_date: string
+  contact_person: string
+  company_name: string
+}

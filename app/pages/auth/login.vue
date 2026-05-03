@@ -1,43 +1,43 @@
 <script setup lang="ts">
+import { toTypedSchema } from "@vee-validate/zod"
+import { useForm } from "vee-validate"
+import * as z from "zod"
+
 useHead({ title: "Log In – Sustain Energy" })
 
 const client = useSupabaseClient()
 
-const form = reactive({ email: "", password: "" })
-const errors = reactive<Record<string, string>>({})
-const loginError = ref("")
-const loading = ref(false)
+const formSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: "Email address is required." })
+      .email("Please enter a valid email address."),
+    password: z.string({ required_error: "Password is required." }).min(8),
+  }),
+)
+const form = useForm({
+  validationSchema: formSchema,
+})
 
-const validate = () => {
-  Object.keys(errors).forEach(
-    (k) => delete (errors as Record<string, string>)[k],
-  )
-  if (!form.email.trim()) errors.email = "Email address is required."
-  if (!form.password) errors.password = "Password is required."
-  return Object.keys(errors).length === 0
-}
-
-const handleSubmit = async () => {
-  loginError.value = ""
-  if (!validate()) return
-  loading.value = true
-
+const onSubmit = form.handleSubmit(async (values) => {
   const { data, error } = await client.auth.signInWithPassword({
-    email: "",
-    password: "",
+    email: values.email,
+    password: values.password,
   })
 
-  if (data.user || error) {
-    loading.value = true
-  }
   if (error) {
     loginError.value = error.message
+    loading.value = false
+    return
   }
-  
+  if (data.user) {
+    loading.value = false
+    navigateTo("/dashboard")
+  }
+})
 
-  // Demo: simulate wrong credentials
-  loginError.value = "Incorrect email or password. Please try again."
-}
+const loading = ref(false)
+const loginError = ref("")
 </script>
 
 <template>
@@ -51,9 +51,7 @@ const handleSubmit = async () => {
       </div>
     </div>
 
-    <h1 class="font-heading mb-1 text-center text-3xl font-bold">
-      Welcome Back
-    </h1>
+    <h1 class="mb-1 text-center">Welcome Back</h1>
     <p class="font-body text-muted-foreground mb-8 text-center">
       Log in to your Sustain Energy account.
     </p>
@@ -65,66 +63,72 @@ const handleSubmit = async () => {
       @click="loginError = ''"
     >
       <UiAlertTitle>Login error</UiAlertTitle>
-      <UiAlertDescription>
+      <UiAlertDescription class="text-sm">
         {{ loginError }}
       </UiAlertDescription>
     </UiAlert>
 
-    <form @submit.prevent="handleSubmit">
+    <form @submit="onSubmit">
       <div class="flex flex-col gap-5">
-        <div class="flex flex-col gap-2">
-          <UiLabel for="emailField" class="font-heading font-medium">
-            Email
-          </UiLabel>
-          <UiInputGroup id="emailField">
-            <UiInputGroupInput
-              type="email"
-              placeholder="info@yourcompany.com"
-              name="email"
-              required
-              autocomplete="email"
-              class="placeholder:text-sm"
-            />
-            <UiInputGroupAddon align="inline-start">
-              <Icon name="ph:envelope-simple-open-bold" />
-            </UiInputGroupAddon>
-          </UiInputGroup>
-        </div>
+        <!-- Email -->
+        <UiFormField v-slot="{ componentField }" name="email">
+          <UiFormItem>
+            <UiFormLabel class="font-heading text-sm font-semibold">
+              Email Address <span class="text-red-400">*</span>
+            </UiFormLabel>
+            <UiFormControl>
+              <UiInputGroup>
+                <UiInputGroupInput
+                  type="email"
+                  placeholder="info@yourcompany.com"
+                  autocomplete="email"
+                  class="placeholder:text-sm"
+                  required
+                  v-bind="componentField"
+                />
+                <UiInputGroupAddon align="inline-start">
+                  <Icon name="ph:envelope-simple-open-bold" />
+                </UiInputGroupAddon>
+              </UiInputGroup>
+            </UiFormControl>
+            <UiFormMessage class="font-heading text-xs font-semibold" />
+          </UiFormItem>
+        </UiFormField>
+        <!-- END Email -->
+        <!-- Password -->
+        <UiFormField v-slot="{ componentField }" name="password">
+          <UiFormItem>
+            <div class="flex items-center justify-between">
+              <UiFormLabel class="font-heading text-sm font-semibold">
+                Password <span class="text-red-400">*</span>
+              </UiFormLabel>
+              <NuxtLink
+                to="/forgot-password"
+                class="font-heading text-primary text-xs font-semibold transition-colors"
+              >
+                Forgot password?
+              </NuxtLink>
+            </div>
+            <UiFormControl>
+              <UiInputGroup>
+                <UiInputGroupInput
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  autocomplete="current-password"
+                  v-bind="componentField"
+                />
+                <UiInputGroupAddon align="inline-start">
+                  <Icon name="ph:password-bold" />
+                </UiInputGroupAddon>
+              </UiInputGroup>
+            </UiFormControl>
+            <UiFormMessage class="font-heading text-xs font-semibold" />
+          </UiFormItem>
+        </UiFormField>
+        <!-- END Password -->
 
-        <div class="flex flex-col gap-2">
-          <div class="flex justify-between">
-            <UiLabel for="passwordField" class="font-heading font-medium">
-              Password
-            </UiLabel>
-            <NuxtLink
-              to="/forgot-password"
-              class="font-heading text-muted-foreground text-xs font-semibold"
-            >
-              Forgot Password?
-            </NuxtLink>
-          </div>
-
-          <UiInputGroup id="passwordField">
-            <UiInputGroupInput
-              type="password"
-              placeholder="••••••••"
-              name="password"
-              required
-              autocomplete="current-password"
-            />
-            <UiInputGroupAddon align="inline-start">
-              <Icon name="ph:password-bold" />
-            </UiInputGroupAddon>
-          </UiInputGroup>
-        </div>
-
-        <UiButton
-          type="submit"
-          full
-          size="lg"
-          :loading="loading"
-          :disabled="loading"
-        >
+        <UiButton type="submit" size="lg" :disabled="loading">
           Log In
         </UiButton>
       </div>
@@ -132,7 +136,7 @@ const handleSubmit = async () => {
 
     <p class="font-body text-muted-foreground mt-6 text-center text-sm">
       Don't have an account?
-      <NuxtLink to="/register" class="text-primary font-semibold">
+      <NuxtLink to="/auth/register" class="text-primary font-semibold">
         Register here
       </NuxtLink>
     </p>

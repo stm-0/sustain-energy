@@ -1,12 +1,35 @@
-//! Leave it, no need to complicate things this much
 import { serverSupabaseClient } from "#supabase/server"
 
-export default defineEventHandler((event) => {
-  const client = serverSupabaseClient(event)
+export default defineEventHandler(async (event) => {
+  const client = await serverSupabaseClient(event)
 
-  // Get user -> company -> calculation -> company
+  const { companyId } = await readBody(event)
 
-  return {
-    hello: "world",
+  const { data, error } = await client
+    .from("calculations")
+    .select(
+      `measure_results (
+          id, score
+        )
+      `,
+    )
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false })
+    .maybeSingle()
+
+  if (error) {
+    console.log(
+      "Error fetching last calculation for company #",
+      companyId,
+      ": ",
+      error,
+    )
+    return
   }
+  if (!data || !data.measure_results) {
+    console.log("No calculation for company #", companyId)
+    return
+  }
+
+  return data.measure_results
 })

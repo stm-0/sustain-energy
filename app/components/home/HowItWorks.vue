@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { motion } from "motion-v"
-
 const steps = [
   {
     num: "01",

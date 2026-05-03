@@ -1,4 +1,17 @@
 <script setup lang="ts">
+const navLinks = [
+  { label: "Home", to: "/" },
+  { label: "About", to: "/about" },
+  { label: "Green Calculator", to: "/calculator" },
+  { label: "Subscription", to: "/subscription" },
+  { label: "Contact", to: "/contact" },
+]
+
+const isActive = (path: string): boolean => {
+  if (path === "/") return route.path === "/"
+  return route.path.startsWith(path)
+}
+
 const route = useRoute()
 const isMenuOpen = ref(false)
 
@@ -10,27 +23,9 @@ watch(
   },
 )
 
-// Simulate auth state
-const isLoggedIn = ref(false)
-const companyName = ref("Edinburgh College")
-
-const navLinks = [
-  { label: "Home", to: "/" },
-  { label: "About", to: "/about" },
-  { label: "Green Calculator", to: "/calculator" },
-  { label: "Subscription", to: "/subscription" },
-  { label: "Dashboard", to: "/dashboard", auth: true },
-  { label: "Contact", to: "/contact" },
-]
-
-const visibleLinks = computed(() =>
-  navLinks.filter((l) => !l.auth || isLoggedIn.value),
-)
-
-const isActive = (path: string): boolean => {
-  if (path === "/") return route.path === "/"
-  return route.path.startsWith(path)
-}
+// Check auth state
+const user = useSupabaseUser().value
+const isLoggedIn = ref(!!user)
 </script>
 
 <template>
@@ -48,7 +43,7 @@ const isActive = (path: string): boolean => {
         aria-label="Main navigation"
       >
         <NuxtLink
-          v-for="link in visibleLinks"
+          v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
           :class="[
@@ -64,53 +59,15 @@ const isActive = (path: string): boolean => {
       <!-- Auth Area — Desktop -->
       <div class="hidden items-center gap-3 lg:flex">
         <UiButton as-child>
-          <!-- TODO: Redirect person from login page to dashboard if user authorised -->
-          <NuxtLink to="/auth/login" class="font-heading">
+          <NuxtLink v-if="!isLoggedIn" to="/auth/login" class="font-heading">
             Get Started
             <Icon name="ph:arrow-right" :size="20" class="text-white" />
           </NuxtLink>
+          <NuxtLink v-else to="/dashboard" class="font-heading">
+            Dashboard
+            <Icon name="ph:arrow-right" :size="20" class="text-white" />
+          </NuxtLink>
         </UiButton>
-
-        <template v-if="isLoggedIn">
-          <div class="group relative flex cursor-pointer items-center gap-2">
-            <div
-              class="bg-secondary flex h-8 w-8 items-center justify-center rounded-full"
-            >
-              <Icon name="ph:building-office" size="16" class="text-white" />
-            </div>
-            <span class="font-heading text-sm font-semibold text-white">
-              {{ companyName }}
-            </span>
-            <Icon name="ph:caret-down" size="14" class="text-white/70" />
-
-            <!-- Dropdown -->
-            <div
-              class="border-border invisible absolute top-full right-0 mt-2 w-48 origin-top-right rounded-b-lg border bg-white opacity-0 shadow-lg transition-all duration-200 group-hover:visible group-hover:opacity-100"
-              style="animation: slideDown 0.2s ease both"
-            >
-              <NuxtLink
-                to="/dashboard"
-                class="font-heading hover:bg-muted border-border flex items-center gap-2 border-b px-4 py-3 text-sm font-semibold"
-              >
-                <Icon name="ph:grid-four" size="16" class="text-primary" />
-                Dashboard
-              </NuxtLink>
-              <NuxtLink
-                to="/profile"
-                class="font-heading hover:bg-muted border-border flex items-center gap-2 border-b px-4 py-3 text-sm font-semibold"
-              >
-                <Icon name="ph:user" size="16" class="text-primary" />
-                My Profile
-              </NuxtLink>
-              <button
-                class="font-heading text-accent-amber flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-[#FEE2E2]"
-              >
-                <Icon name="ph:sign-out" size="16" />
-                Log Out
-              </button>
-            </div>
-          </div>
-        </template>
       </div>
 
       <!-- Mobile Hamburger -->
@@ -133,7 +90,7 @@ const isActive = (path: string): boolean => {
       >
         <div class="container-app flex flex-col gap-1 py-4">
           <NuxtLink
-            v-for="link in visibleLinks"
+            v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
             :class="[

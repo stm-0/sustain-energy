@@ -188,7 +188,7 @@ const credentials = [
           v-fade-up
         >
           <div
-            class="flex h-20 w-20 items-center justify-center rounded-2xl"
+            class="flex size-20 items-center justify-center rounded-2xl"
             :style="`background-color: ${cred.color}15; border: 2px solid ${cred.color}30;`"
           >
             <Icon

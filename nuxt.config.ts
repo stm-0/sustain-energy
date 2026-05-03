@@ -18,6 +18,10 @@ export default defineNuxtConfig({
         "reka-ui",
         "clsx",
         "tailwind-merge",
+        "@vee-validate/zod",
+        "vee-validate",
+        "zod",
+        "vue-sonner",
       ],
     },
   },
@@ -52,15 +56,7 @@ export default defineNuxtConfig({
       "2xl": 1536,
     },
   },
-  supabase: {
-    redirectOptions: {
-      login: "/auth/login",
-      callback: "/confirm",
-      include: undefined,
-      exclude: ["/", "/about", "/calculator", "/privacy", "/terms"], // TODO: change before production
-      saveRedirectToCookie: false,
-    },
-  },
+
   pinia: {},
   motionV: {
     directives: true,
@@ -71,6 +67,24 @@ export default defineNuxtConfig({
         transition: { duration: 0.5, type: "spring" },
         inViewOptions: { once: true },
       },
+    },
+  },
+  // Production settings
+  $production: {
+    supabase: {
+      redirectOptions: {
+        login: "/auth/login",
+        callback: "/confirm",
+        include: undefined,
+        exclude: ["/", "/about", "/calculator", "/privacy", "/terms"], // TODO: change before production
+        saveRedirectToCookie: false,
+      },
+    },
+  },
+  // Dev settings
+  $development: {
+    supabase: {
+      redirect: false,
     },
   },
 })

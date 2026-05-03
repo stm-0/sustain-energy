@@ -43,19 +43,19 @@ export type Database = {
       companies: {
         Row: {
           company_name: string
-          contact_person: string | null
+          contact_person: string
           id: number
           join_date: string
         }
         Insert: {
           company_name: string
-          contact_person?: string | null
+          contact_person?: string
           id?: number
           join_date?: string
         }
         Update: {
           company_name?: string
-          contact_person?: string | null
+          contact_person?: string
           id?: number
           join_date?: string
         }
@@ -229,7 +229,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_company_count: { Args: never; Returns: number }
     }
     Enums: {
       payment_status: "pending" | "paid"

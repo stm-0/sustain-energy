@@ -1,59 +1,44 @@
 <script setup lang="ts">
-import type { CertificateLevel } from "~/types/app.types"
+import { certificateStyles } from "~/types/app.types"
 
-interface Props {
-  level: CertificateLevel
-  companyName?: string
-  score?: number
-  year?: number
-  compact?: boolean
-}
+const { score } = storeToRefs(useMeasurementsStore())
+const userStore = useUserStore()
+const { userCompany } = storeToRefs(userStore)
+const level = computed(() => calcCertificateLevel(score.value))
 
-const props = withDefaults(defineProps<Props>(), {
-  companyName: "Your Company",
-  score: 0,
-  year: new Date().getFullYear(),
-  compact: false,
-})
+const props = withDefaults(
+  defineProps<{
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  },
+)
 
-interface CertificateOption {
-  icon: string
-  label: string
-  sub: string
-  cardClass: string
-  iconColor: string
-  scoreColor: string
-}
+onMounted(async () => await userStore.getUserCompany())
 
-// FIXME: Fix colors
 const options = {
   gold: {
-    icon: "ph:leaf-fill",
-    label: "GREEN CERTIFIED",
+    label: "GOLD LEVEL",
     sub: "Sustainability Target Achieved",
-    cardClass: "#fcc80033 border-primary",
-    iconColor: "#fcc800",
-    scoreColor: "#fcc800",
+    topBarClass: "bg-certificate-gold",
+    ...certificateStyles["gold"],
   },
   silver: {
-    icon: "ph:warning-circle-bold",
-    label: "AMBER LEVEL",
+    label: "SILVER LEVEL",
     sub: "Approaching Sustainability Target",
-    cardClass: "#d4d4d833 border-score-amber",
-    iconColor: "#d4d4d8",
-    scoreColor: "#d4d4d8",
+    topBarClass: "bg-certificate-silver",
+    ...certificateStyles["silver"],
   },
   bronze: {
-    icon: "ph:x-circle-bold",
-    label: "REQUIRES ACTION",
+    label: "BRONZE LEVEL",
     sub: "Below Sustainability Target",
-    cardClass: "#7e2a0c33 border-score-red",
-    iconColor: "#7e2a0c",
-    scoreColor: "#7e2a0c",
+    topBarClass: "bg-certificate-bronze",
+    ...certificateStyles["bronze"],
   },
 }
 
-const config = computed(() => options[props.level])
+const config = computed(() => options[level.value])
 </script>
 
 <template>
@@ -74,20 +59,16 @@ const config = computed(() => options[props.level])
     <!-- Top accent bar -->
     <div
       class="absolute top-0 right-0 left-0 h-1.5 rounded-t-sm"
-      :style="`background: ${config.iconColor};`"
+      :class="config.topBarClass"
     />
 
-    <Icon
-      :name="config.icon"
-      size="48"
-      :style="`color: ${config.iconColor};`"
-    />
+    <Icon :name="config.icon" size="48" :class="config.textClass" />
 
     <!-- Score -->
     <div>
       <p
         class="font-heading text-5xl leading-none font-bold"
-        :style="`color: ${config.scoreColor};`"
+        :class="config.textClass"
       >
         {{ score }}
       </p>
@@ -100,7 +81,7 @@ const config = computed(() => options[props.level])
     <div>
       <p
         class="font-heading text-sm font-bold tracking-widest uppercase"
-        :style="`color: ${config.iconColor};`"
+        :class="config.textClass"
       >
         {{ config.label }}
       </p>
@@ -112,23 +93,11 @@ const config = computed(() => options[props.level])
     <!-- Company & year -->
     <div class="w-full border-t border-black/10 pt-4">
       <p class="font-heading text-sm font-semibold">
-        {{ companyName }}
+        {{ userCompany?.company_name ?? "Your company" }}
       </p>
       <p class="font-body text-muted-foreground mt-0.5 text-xs">
-        Annual Assessment {{ year }}
+        Annual Assessment {{ new Date().getFullYear() }}
       </p>
     </div>
-
-    <!-- Download -->
-    <UiButton variant="secondary" size="sm" full>
-      <Icon name="ph:download-simple" size="14" />
-      Download Certificate
-    </UiButton>
   </div>
 </template>
-
-<style scoped>
-.certificate-card {
-  position: relative;
-}
-</style>

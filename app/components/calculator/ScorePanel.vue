@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<Props>(), {
   total: 10,
 })
 
-const level = computed(() => calcCertifiacteLevel(props.score))
+const level = computed(() => calcCertificateLevel(props.score))
 
 const levelConfig = computed(
   () =>
@@ -38,25 +38,7 @@ const shortfall = computed(() => Math.max(0, 70 - props.score))
 </script>
 
 <template>
-  <div class="card sticky top-20 flex flex-col gap-5">
-    <!-- Progress header -->
-    <div>
-      <div class="mb-2 flex items-center justify-between">
-        <span
-          class="font-heading text-muted-foreground text-xs font-semibold tracking-widest uppercase"
-        >
-          Progress
-        </span>
-        <span
-          class="font-heading text-sm font-bold"
-          style="color: var(--color-forest)"
-        >
-          {{ completed }} / {{ total }}
-        </span>
-      </div>
-      <UiProgress :model-value="progressPct" />
-    </div>
-
+  <div class="sticky top-20 flex flex-col gap-5">
     <!-- Live score -->
     <div
       class="rounded-xl p-4 text-center transition-all duration-300"
@@ -89,16 +71,13 @@ const shortfall = computed(() => Math.max(0, 70 - props.score))
     </div>
 
     <!-- Shortfall notice -->
-    <div
-      v-if="shortfall > 0 && completed > 0"
-      class="alert alert-warning text-sm"
-    >
+    <UiAlert v-if="shortfall > 0 && completed > 0" class="text-sm">
       <Icon name="ph:warning-circle" size="16" class="shrink-0" />
       <p>
         <strong>{{ shortfall }} pts</strong> below Green target. Buy vouchers to
         close the gap.
       </p>
-    </div>
+    </UiAlert>
 
     <!-- Green threshold indicator -->
     <div class="text-center">

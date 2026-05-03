@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{ download: []; buyVouchers: [] }>()
 
-const level = computed(() => calcCertifiacteLevel(props.score))
+const level = computed(() => calcCertificateLevel(props.score))
 
 const shortfall = computed(() => Math.max(0, 70 - props.score))
 const vouchersNeeded = computed(() => shortfall.value)
@@ -18,13 +18,13 @@ const voucherCost = computed(() => (vouchersNeeded.value * 2.5).toFixed(2))
 </script>
 
 <template>
-  <div class="card animate-fade-up mt-8">
+  <div class="animate-fade-up">
     <div class="border-border mb-6 flex items-center gap-3 border-b pb-4">
       <Icon name="ph:chart-bar-bold" size="24" class="text-primary" />
-      <h2>Your Green Calculator Results</h2>
+      <h2>Your Results</h2>
     </div>
 
-    <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+    <div class="grid grid-cols-1 items-start gap-8">
       <!-- Certificate card -->
       <div class="flex justify-center">
         <CertificateBadge

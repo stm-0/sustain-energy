@@ -1,33 +1,56 @@
 <script setup lang="ts">
+import { toast } from "vue-sonner"
+
 import { measurements } from "~/types/app.types"
 
 useHead({ title: "Green Calculator – Sustain Energy" })
 
+const userStore = useUserStore()
+onMounted(() => callOnce("user", async () => await userStore.init()))
 const store = useMeasurementsStore()
+const { userCompany } = storeToRefs(userStore)
 
+const isLoading = ref(false)
 const submitted = ref(false)
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!store.isAllComplete) return
+  await userStore.init()
+
+  isLoading.value = true
+
+  // add calculations and measurements to db
+  submitted.value = await $fetch("/api/measurements", {
+    method: "post",
+    body: await userStore.createSaveMeasurementsPayload(),
+  })
+
+  if (!submitted.value) {
+    isLoading.value = false
+    toast.error("Your score was not saved. Contact support.")
+    return
+  }
+
   submitted.value = true
+  toast.success("Your score was saved!")
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
 }
 </script>
 
 <template>
   <section>
-    <div class="container flex max-w-150 flex-col">
+    <div class="container flex flex-col">
       <!-- Page header -->
       <div class="mb-6">
         <h1>Green Calculator</h1>
-        <p class="font-body text-muted-foreground mt-1">
+        <p class="font-body text-muted-foreground mt-2">
           Score your company across 10 sustainability measurements to receive
           your certificate.
         </p>
       </div>
 
       <!-- Instructions banner -->
-      <UiAlert class="mb-6 max-w-150">
+      <UiAlert class="mb-6">
         <Icon name="ph:info-bold" size="24" />
         <UiAlertTitle class="font-heading font-bold">Instructions</UiAlertTitle>
         <UiAlertDescription>
@@ -40,46 +63,26 @@ const handleSubmit = () => {
         </UiAlertDescription>
       </UiAlert>
 
-      <!-- Sticky progress bar -->
       <div
-        class="border-border sticky top-16 z-30 -mx-4 mb-6 border-b bg-white/80 px-4 py-3 backdrop-blur-sm"
+        class="grid grid-cols-1 items-start justify-items-center gap-10 lg:grid-cols-4"
       >
-        <div class="mx-auto flex max-w-7xl items-center gap-4">
-          <span
-            class="font-heading text-primary text-xs font-semibold whitespace-nowrap"
-          >
-            {{ store.completed }} / {{ store.selections.length }} measurements
-            completed
-          </span>
-          <UiProgress
-            :model-value="(store.completed / store.selections.length) * 100"
-          />
-          <span
-            class="font-heading text-primary text-xs font-bold whitespace-nowrap"
-          >
-            {{ store.score }} pts
-          </span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 items-start gap-20">
-        <!-- measurements list -->
-        <div class="grid max-w-150 grid-cols-1">
-          <CalculatorCriterionRow
-            v-for="(m, i) in measurements"
-            :key="i"
-            :measurement="m"
+        <!-- Side score panel -->
+        <div class="sticky top-16 flex w-full flex-col gap-4">
+          <CalculatorScorePanel
+            :score="store.score"
+            :completed="store.completed"
+            :total="measurements.length"
           />
 
           <p
             v-if="!store.isAllComplete"
-            class="font-heading text-muted-foreground mt-6 text-right text-xs"
+            class="font-heading text-muted-foreground mt-6 text-xs"
           >
             Complete all {{ measurements.length - store.completed }} remaining
             measurements to submit.
           </p>
           <!-- Action buttons row -->
-          <div class="flex flex-wrap justify-end gap-3 pt-2">
+          <div class="flex flex-wrap gap-3 pt-2">
             <UiButton
               v-if="submitted"
               variant="destructive"
@@ -123,7 +126,7 @@ const handleSubmit = () => {
 
             <UiButton
               type="button"
-              :disabled="!store.isAllComplete"
+              :disabled="!store.isAllComplete || isLoading"
               @click="handleSubmit"
             >
               <Icon name="ph:calculator-bold" size="18" />
@@ -132,24 +135,50 @@ const handleSubmit = () => {
           </div>
         </div>
 
-        <!-- Side score panel -->
-        <div class="lg:col-span-1">
-          <CalculatorScorePanel
+        <!-- Measurements list -->
+        <div class="col-span-2 grid max-w-150 grid-cols-1">
+          <!-- Sticky progress bar -->
+          <div
+            class="sticky top-16 z-30 -mx-4 mb-6 border-b bg-white/80 px-4 py-3 backdrop-blur-sm"
+          >
+            <div class="mx-auto flex max-w-7xl items-center gap-4">
+              <span
+                class="font-heading text-primary text-xs font-semibold whitespace-nowrap"
+              >
+                {{ store.completed }} /
+                {{ store.selections.length }} measurements completed
+              </span>
+              <UiProgress
+                :model-value="(store.completed / store.selections.length) * 100"
+              />
+              <span
+                class="font-heading text-primary text-xs font-bold whitespace-nowrap"
+              >
+                {{ store.score }} pts
+              </span>
+            </div>
+          </div>
+
+          <!-- Measurements -->
+          <div class="grid grid-cols-1">
+            <CalculatorCriterionRow
+              v-for="(m, i) in measurements"
+              :key="i"
+              :measurement="m"
+            />
+          </div>
+        </div>
+
+        <!-- Certificate side panel -->
+        <div class="sticky top-16">
+          <!-- Results section -->
+          <CalculatorResultsSection
+            v-if="submitted"
             :score="store.score"
-            :completed="store.completed"
-            :total="measurements.length"
+            :company-name="userCompany?.company_name"
           />
         </div>
       </div>
-
-      <!-- Results section -->
-      <CalculatorResultsSection
-        v-if="submitted"
-        :score="store.score"
-        company-name="Edinburgh College"
-        @buy-vouchers="navigateTo('/vouchers')"
-        @download="console.log('download')"
-      />
     </div>
   </section>
 </template>
