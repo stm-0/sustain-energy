@@ -91,7 +91,7 @@ const deleteUserAccount = () => {
 <template>
   <div>
     <!-- Page Content -->
-    <section class="relative -top-32 justify-center">
+    <section class="relative justify-center">
       <div class="container">
         <!-- Header -->
         <div class="mb-6 flex items-start justify-between gap-4">

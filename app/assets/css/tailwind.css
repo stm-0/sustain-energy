@@ -44,7 +44,7 @@
   --color-score-amber: #db792b;
   --color-score-red: #db535a;
   --color-certificate-bronze: var(--color-amber-900);
-  --color-certificate-silver: var(--color-zinc-100);
+  --color-certificate-silver: var(--color-zinc-400);
   --color-certificate-gold: var(--color-amber-400);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

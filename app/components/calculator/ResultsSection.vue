@@ -15,6 +15,8 @@ const level = computed(() => calcCertificateLevel(props.score))
 const shortfall = computed(() => Math.max(0, 70 - props.score))
 const vouchersNeeded = computed(() => shortfall.value)
 const voucherCost = computed(() => (vouchersNeeded.value * 2.5).toFixed(2))
+
+const { downloadCertificate } = useCertificateDownload()
 </script>
 
 <template>
@@ -98,12 +100,14 @@ const voucherCost = computed(() => (vouchersNeeded.value * 2.5).toFixed(2))
         </UiAlert>
 
         <!-- Action buttons -->
-        <div class="flex flex-col gap-3 sm:flex-row">
-          <UiButton v-if="shortfall > 0" @click="emit('buyVouchers')">
-            <Icon name="ph:shopping-cart-bold" size="16" />
-            Buy {{ vouchersNeeded }} Green Vouchers — £{{ voucherCost }}
+        <div class="flex flex-col gap-3">
+          <UiButton v-if="shortfall > 0" as-child>
+            <NuxtLink to="/vouchers" class="flex items-center gap-2">
+              <Icon name="ph:shopping-cart-bold" size="16" />
+              Buy {{ vouchersNeeded }} Green Vouchers — £{{ voucherCost }}
+            </NuxtLink>
           </UiButton>
-          <UiButton v-else @click="emit('download')">
+          <UiButton @click="downloadCertificate({ companyName, score, level })">
             <Icon name="ph:download-simple-bold" size="16" />
             Download Certificate
           </UiButton>

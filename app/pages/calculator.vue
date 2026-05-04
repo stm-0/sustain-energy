@@ -20,7 +20,7 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   // add calculations and measurements to db
-  submitted.value = await $fetch("/api/measurements", {
+  submitted.value = await $fetch<boolean>("/api/measurements", {
     method: "post",
     body: await userStore.createSaveMeasurementsPayload(),
   })
