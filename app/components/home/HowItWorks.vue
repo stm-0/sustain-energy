@@ -172,8 +172,9 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-      <div class="">
+      <div class="w-125">
         <!-- TODO: Images of subscriptions, vouchers, certificates... -->
+				<NuxtImg src="/images/home/calculator_example.webp" />
       </div>
     </div>
   </UiSection>
