@@ -5,6 +5,20 @@ import { measurements } from "~/types/app.types"
 
 useHead({ title: "Green Calculator – Sustain Energy" })
 
+// Redirect user without subscription
+definePageMeta({
+  middleware: async (to, from) => {
+    const { data: subscriptionEndDate } =
+      await useFetch<string>("/api/subscriptions")
+
+    if (!subscriptionEndDate) {
+      return navigateTo("/subscription")
+    }
+
+    return navigateTo(to)
+  },
+})
+
 const userStore = useUserStore()
 onMounted(() => callOnce("user", async () => await userStore.init()))
 const store = useMeasurementsStore()

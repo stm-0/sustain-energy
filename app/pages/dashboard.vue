@@ -5,13 +5,10 @@ useHead({ title: "Dashboard – Sustain Energy" })
 
 // Fetch user details from database
 const userStore = useUserStore()
-// TODO: Create middleware to call userStore.init() there
-onMounted(() => callOnce("user", async () => await userStore.init()))
-
 const { userCompany } = storeToRefs(userStore)
 
 const measurementsStore = useMeasurementsStore()
-const { savedScore } = storeToRefs(measurementsStore)
+const { savedScore, savedResultsDate } = storeToRefs(measurementsStore)
 
 // Demo data
 const company = {
@@ -20,33 +17,18 @@ const company = {
   subscriptionUntil: "31 January 2027",
   lastCalculator: "12 March 2026",
 }
-const level = ref(
-  savedScore.value ? calcCertificateLevel(savedScore.value!) : null,
+const level = computed(() =>
+  savedScore.value ? calcCertificateLevel(savedScore.value) : null,
 )
-const shortfall = ref(savedScore.value ? 70 - savedScore.value : null)
+const shortfall = computed(() =>
+  Math.max(0, 70 - (savedScore.value! + (purchaseVouchers.value ?? 0))),
+)
 
-const activityRows = [
-  {
-    date: "12 Mar 2026",
-    action: "Green Calculator submitted",
-    result: "Amber Level",
-    resultVariant: "amber" as const,
-  },
-  {
-    date: "01 Jan 2026",
-    action: "Subscription purchased",
-    result: "Active",
-    resultVariant: "green" as const,
-  },
-  {
-    date: "01 Jan 2026",
-    action: "Account created",
-    result: "Registered",
-    resultVariant: "neutral" as const,
-  },
-]
+const { data: purchaseVouchers } = await useFetch<number>("/api/vouchers/last")
+const { data: subscriptionEndDate } =
+  await useFetch<string>("/api/subscriptions")
 
-// TODO: Connect to actual data
+onMounted(async () => await userStore.init())
 </script>
 
 <template>
@@ -55,23 +37,23 @@ const activityRows = [
       <!-- Welcome bar -->
       <DashboardWelcomeBar
         :company-name="userCompany?.company_name ?? 'None'"
-        :status="company.status"
-        :subscription-until="company.subscriptionUntil"
-        :last-calculator="company.lastCalculator"
+        :status="subscriptionEndDate ? 'active' : 'inactive'"
+        :subscription-until="dateString(subscriptionEndDate)"
+        :last-calculator="savedResultsDate"
       />
 
       <!-- Summary cards -->
       <UiSection title="Summary" class="px-0 py-5 [&_.container]:gap-4">
         <!-- Shortfall notice -->
-        <UiAlert v-if="savedScore && savedScore < 70">
+        <UiAlert v-if="shortfall > 0">
           <UiAlertTitle class="font-heading text-lg font-bold">
             Below the Green target
           </UiAlertTitle>
           <UiAlertDescription class="text-sm">
             <p>
               Your company is
-              <strong>{{ 70 - savedScore }} points</strong> below the Green
-              target <br />
+              <strong>{{ shortfall }} points</strong> below the Green target
+              <br />
               Purchase green vouchers to close the gap.
             </p>
           </UiAlertDescription>
@@ -85,7 +67,7 @@ const activityRows = [
             :value="`${savedScore} / 100 pts`"
             :sub="
               savedScore
-                ? `Last updated ${company.lastCalculator}`
+                ? `Last updated ${savedResultsDate}`
                 : 'Make a calculation'
             "
             link-label="View Full Results"
@@ -108,12 +90,10 @@ const activityRows = [
             icon="ph:certificate-bold"
             title="Certificate Level"
             value=""
-            link-label="Download Certificate"
-            link-to="#"
             :is-link-active="!!level"
             :sub="
               shortfall
-                ? shortfall < 0
+                ? shortfall > 0
                   ? 'Purchase vouchers to close shortfall'
                   : 'Excellent job!'
                 : 'Make a calculation'
@@ -127,58 +107,23 @@ const activityRows = [
             </template>
           </DashboardSummaryCard>
 
-          <!-- TODO: add actual ammount of points boosted -->
           <DashboardSummaryCard
             icon="ph:ticket-bold"
             title="Green Vouchers"
-            value="0 purchased"
-            :sub="savedScore ? 'Points boosted: +0' : 'Make a calculation'"
+            :value="`${purchaseVouchers} purchased`"
+            :sub="
+              savedScore
+                ? `Points boosted: +${purchaseVouchers}`
+                : 'Make a calculation'
+            "
             link-label="Buy Vouchers"
-            link-to="/vouchers"
+            :link-to="`/checkout?item=vouchers&quantity=${70 - savedScore!}`"
             :is-link-active="!!savedScore && savedScore < 100"
             icon-bg="bg-primary/20 border-primary/20"
             icon-color="text-primary"
           />
         </div>
       </UiSection>
-
-      <!-- Activity table -->
-      <DashboardActivityTable :rows="activityRows" />
     </div>
-
-    <!-- Subscription modal -->
-    <!-- <AppModal
-      v-model="showSubscribeModal"
-      title="Manage Subscription"
-      size="sm"
-    >
-      <div class="flex flex-col gap-3">
-        <div class="font-display flex justify-between text-sm">
-          <span style="color: var(--color-muted)">Status</span>
-          <AppBadge variant="green">Active</AppBadge>
-        </div>
-        <div class="font-display flex justify-between text-sm">
-          <span style="color: var(--color-muted)">Plan</span>
-          <span class="font-semibold" style="color: var(--color-dark)"
-            >Basic — £99.99/year</span
-          >
-        </div>
-        <div class="font-display flex justify-between text-sm">
-          <span style="color: var(--color-muted)">Valid until</span>
-          <span class="font-semibold" style="color: var(--color-dark)">{{
-            company.subscriptionUntil
-          }}</span>
-        </div>
-      </div>
-      <template #footer>
-        <UiButton
-          variant="secondary"
-          size="sm"
-          @click="showSubscribeModal = false"
-          >Close</UiButton
-        >
-        <UiButton size="sm" to="/subscription">View Plans</UiButton>
-      </template>
-    </AppModal> -->
   </section>
 </template>

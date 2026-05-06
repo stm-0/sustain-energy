@@ -9,9 +9,10 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   companyName: "Your Company",
   status: "active",
-  subscriptionUntil: "31 January 2027",
   lastCalculator: undefined,
 })
+
+const client = useSupabaseClient()
 
 const statusConfig = computed(
   () =>
@@ -21,6 +22,14 @@ const statusConfig = computed(
       deactivated: { label: "Deactivated" },
     })[props.status],
 )
+
+const measurementsStore = useMeasurementsStore()
+const { savedScore } = storeToRefs(measurementsStore)
+const level = computed(() =>
+  savedScore.value ? calcCertificateLevel(savedScore.value!) : null,
+)
+
+const { downloadCertificate } = useCertificateDownload()
 </script>
 
 <template>
@@ -43,7 +52,10 @@ const statusConfig = computed(
             {{ statusConfig.label }}
           </UiBadge>
           <slot name="details">
-            <span class="font-body text-muted-foreground text-sm">
+            <span
+              v-if="subscriptionUntil"
+              class="font-body text-muted-foreground text-sm"
+            >
               Subscription valid until: {{ subscriptionUntil }}
             </span>
             <span class="font-body text-muted-foreground text-sm">
@@ -62,11 +74,31 @@ const statusConfig = computed(
             Company Profile
           </NuxtLink>
         </UiButton>
-        <UiButton variant="outline" size="sm">
-          <Icon name="ph:credit-card-bold" size="15" />
-          Manage Subscription
+        <UiButton
+          v-if="savedScore && level"
+          size="sm"
+          variant="outline"
+          @click="
+            () =>
+              downloadCertificate({
+                companyName: companyName,
+                score: savedScore!,
+                level: level!,
+              })
+          "
+        >
+          <Icon name="ph:download-simple-bold" size="16" />
+          Download Certificate
         </UiButton>
-        <UiButton size="sm" variant="destructive">
+        <UiButton
+          size="sm"
+          variant="destructive"
+          @click="
+            async () => {
+              await client.auth.signOut()
+            }
+          "
+        >
           <Icon name="ph:sign-out" size="15" />
           Log Out
         </UiButton>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { PRICES } from "~/types/app.types"
+
 interface Props {
   score: number
   companyName?: string
@@ -14,7 +16,9 @@ const level = computed(() => calcCertificateLevel(props.score))
 
 const shortfall = computed(() => Math.max(0, 70 - props.score))
 const vouchersNeeded = computed(() => shortfall.value)
-const voucherCost = computed(() => (vouchersNeeded.value * 2.5).toFixed(2))
+const voucherCost = computed(() =>
+  (vouchersNeeded.value * PRICES["vouchers"]["unitPrice"]).toFixed(2),
+)
 
 const { downloadCertificate } = useCertificateDownload()
 </script>
@@ -102,7 +106,16 @@ const { downloadCertificate } = useCertificateDownload()
         <!-- Action buttons -->
         <div class="flex flex-col gap-3">
           <UiButton v-if="shortfall > 0" as-child>
-            <NuxtLink to="/vouchers" class="flex items-center gap-2">
+            <NuxtLink
+              :to="{
+                name: '/checkout',
+                params: {
+                  item: 'vouchers',
+                  quantity: vouchersNeeded,
+                },
+              }"
+              class="flex items-center gap-2"
+            >
               <Icon name="ph:shopping-cart-bold" size="16" />
               Buy {{ vouchersNeeded }} Green Vouchers — £{{ voucherCost }}
             </NuxtLink>

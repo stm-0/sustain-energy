@@ -59,11 +59,6 @@ const sections = [
       <!-- Header -->
       <UiCard class="border-accent bg-secondary mb-10 pb-6">
         <UiCardHeader class="mb-3 flex items-center gap-3">
-          <!-- <div
-            class="bg-accent/20 flex h-10 w-10 items-center justify-center rounded-xl"
-          >
-            
-          </div> -->
           <UiBadge>
             <Icon name="ph:lock-simple-bold" class="text-white" />
             <span>Legal Document</span>

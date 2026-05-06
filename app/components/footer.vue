@@ -17,8 +17,14 @@ const credentials = [
     color: "var(--color-primary)",
   },
   {
-    icon: "ph:graduation-cap-bold",
+    img: "/images/ec_logo.webp",
     label: "Edinburgh College",
+    sub: "Endorsed & Supported",
+    color: "#003865",
+  },
+  {
+    img: "/images/unesco_logo.webp",
+    label: "UNESCO",
     sub: "Endorsed & Supported",
     color: "#003865",
   },
@@ -98,10 +104,12 @@ const credentials = [
                 class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/6"
               >
                 <Icon
+                  v-if="cred.icon"
                   :name="cred.icon"
                   size="22"
                   :style="`color: ${cred.color}`"
                 />
+                <NuxtImg v-else :src="cred.img" class="size-5.5" />
               </div>
               <div>
                 <p class="font-heading text-sm font-semibold text-white">

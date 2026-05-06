@@ -118,3 +118,10 @@ export interface UserCompany {
   contact_person: string
   company_name: string
 }
+
+export const PRICES = {
+  subscription: { label: "Basic Plan – Annual Subscription", unitPrice: 99.99 },
+  vouchers: { label: "Green Voucher", unitPrice: 10 },
+} as const
+
+export type CheckoutItem = "vouchers" | "subscription"

@@ -76,7 +76,14 @@ export default defineNuxtConfig({
         login: "/auth/login",
         callback: "/confirm",
         include: undefined,
-        exclude: ["/", "/about", "/calculator", "/privacy", "/terms"], // TODO: change before production
+        exclude: [
+          "/",
+          "/about",
+          "/calculator",
+          "/subscription",
+          "/privacy",
+          "/terms",
+        ],
         saveRedirectToCookie: false,
       },
     },

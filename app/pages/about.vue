@@ -41,7 +41,7 @@ const credentials = [
     color: "#008236",
   },
   {
-    icon: "ph:graduation-cap-bold",
+    img: "/images/ec_logo_dark.webp",
     label: "Edinburgh College",
     sub: "Endorsed & Supported",
     color: "#003865",
@@ -59,7 +59,6 @@ const credentials = [
   <div>
     <!-- Hero -->
     <section class="relative flex h-64 items-center overflow-hidden md:h-80">
-      <!-- FIXME: create bg image -->
       <div
         class="from-primary/20 via-primary/0 absolute top-1/12 left-1/4 -z-10 size-48 bg-radial via-70% to-transparent"
       ></div>
@@ -192,10 +191,12 @@ const credentials = [
             :style="`background-color: ${cred.color}15; border: 2px solid ${cred.color}30;`"
           >
             <Icon
+              v-if="cred.icon"
               :name="cred.icon"
               size="36"
               :style="`color: ${cred.color};`"
             />
+            <NuxtImg v-else :src="cred.img" class="size-9" />
           </div>
           <p class="font-heading text-sm font-bold">
             {{ cred.label }}

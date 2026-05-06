@@ -1,70 +1,51 @@
 <script setup lang="ts">
-useHead({ title: "Contact Us – Sustain Energy" })
+import { toTypedSchema } from "@vee-validate/zod"
+import { useForm } from "vee-validate"
+import * as z from "zod"
 
-const form = reactive({
-  name: "Edinburgh College", // pre-filled from profile
-  email: "info@edinburghcollege.ac.uk",
-  telephone: "+44 131 669 4400",
-  subject: "",
-  message: "",
-  category: "",
-})
+useHead({ title: "Contact Us – Sustain Energy" })
 
 const errors = reactive<Record<string, string>>({})
 const loading = ref(false)
 const success = ref(false)
 
-const categoryOptions = [
-  { value: "general", label: "General Enquiry" },
-  { value: "technical", label: "Technical Support" },
-  { value: "billing", label: "Billing" },
-  { value: "subscription", label: "Subscription" },
-  { value: "other", label: "Other" },
-]
+const client = useSupabaseClient()
 
-const validate = () => {
-  Object.keys(errors).forEach(
-    (k) => delete (errors as Record<string, string>)[k],
-  )
-  if (!form.name.trim()) errors.name = "Name is required."
-  if (!form.email.trim()) errors.email = "Email is required."
-  if (!form.subject.trim()) errors.subject = "Subject is required."
-  if (!form.message.trim()) errors.message = "Message is required."
-  return Object.keys(errors).length === 0
-}
+const formSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: "Email address is required." })
+      .email("Please enter a valid email address."),
+    name: z.string({ required_error: "Name is required." }).min(4),
+    subject: z.string({ required_error: "Subject is required." }).min(4),
+    message: z.string({ required_error: "Message is required" }).min(20),
+  }),
+)
+const form = useForm({
+  validationSchema: formSchema,
+})
 
-const handleSubmit = async () => {
-  if (!validate()) return
-  loading.value = true
-  await new Promise((r) => setTimeout(r, 1100))
-  loading.value = false
+const onSubmit = form.handleSubmit(async (values) => {
+  const { error } = await client.from("feedback").insert({
+    message: `${values.email}: ${values.subject}\n${values.message}`,
+  })
+
+  if (error) {
+    errors.value = error.message
+    loading.value = false
+    return
+  }
+
   success.value = true
-  form.subject = ""
-  form.message = ""
-  form.category = ""
-}
-
-const clearForm = () => {
-  form.subject = ""
-  form.message = ""
-  form.category = ""
-  Object.keys(errors).forEach(
-    (k) => delete (errors as Record<string, string>)[k],
-  )
-}
+})
 </script>
 
 <template>
-  <div class="section">
-    <div class="container-app">
+  <section>
+    <div class="container">
       <div class="mb-8">
-        <h1
-          class="font-display text-3xl font-bold"
-          style="color: var(--color-dark)"
-        >
-          Get In Touch
-        </h1>
-        <p class="font-body mt-1" style="color: var(--color-muted)">
+        <h1 class="font-heading text-3xl font-bold">Get In Touch</h1>
+        <p class="text-muted-foreground mt-1">
           We're here to help — expect a reply within 2 business days.
         </p>
       </div>
@@ -73,72 +54,49 @@ const clearForm = () => {
         <!-- Left info panel -->
         <aside class="flex flex-col gap-6 lg:col-span-2">
           <div class="card flex flex-col gap-5">
-            <div
-              class="flex h-14 w-14 items-center justify-center rounded-2xl"
-              style="background-color: var(--color-lime-muted)"
-            >
+            <div class="flex size-14 items-center justify-center rounded-2xl">
               <Icon
                 name="ph:envelope-simple-bold"
                 size="28"
-                style="color: var(--color-forest)"
+                class="text-primary"
               />
             </div>
             <div>
-              <h2
-                class="font-display mb-2 text-xl font-bold"
-                style="color: var(--color-dark)"
-              >
-                Contact Us
-              </h2>
-              <p
-                class="font-body text-sm leading-relaxed"
-                style="color: var(--color-muted)"
-              >
+              <h2 class="mb-2 text-xl font-bold">Contact Us</h2>
+              <p class="text-muted-foreground text-sm leading-relaxed">
                 Have a question, suggestion, or technical issue? Fill in the
                 form and our team will respond within 2 business days.
               </p>
             </div>
 
-            <div
-              class="flex flex-col gap-3 pt-2"
-              style="border-top: 1px solid var(--color-border)"
-            >
+            <div class="flex flex-col gap-3 border-t pt-2">
               <a
                 href="mailto:support@sustainenergy.co.uk"
-                class="font-body flex items-center gap-3 text-sm transition-colors"
-                style="color: var(--color-body)"
+                class="flex items-center gap-3 font-sans text-sm transition-colors"
               >
                 <Icon
                   name="ph:envelope-simple-bold"
                   size="18"
-                  style="color: var(--color-forest); flex-shrink: 0"
+                  class="text-primary shrink-0"
                 />
                 support@sustainenergy.co.uk
               </a>
               <a
                 href="tel:+441310000000"
-                class="font-body flex items-center gap-3 text-sm transition-colors"
-                style="color: var(--color-body)"
+                class="flex items-center gap-3 font-sans text-sm transition-colors"
               >
                 <Icon
                   name="ph:phone-bold"
                   size="18"
-                  style="color: var(--color-forest); flex-shrink: 0"
+                  class="text-primary shrink-0"
                 />
                 +44 131 000 0000
               </a>
-              <div
-                class="font-body flex items-start gap-3 text-sm"
-                style="color: var(--color-body)"
-              >
+              <div class="flex items-start gap-3 text-sm">
                 <Icon
                   name="ph:map-pin-bold"
                   size="18"
-                  style="
-                    color: var(--color-forest);
-                    flex-shrink: 0;
-                    margin-top: 2px;
-                  "
+                  class="text-primary mt-1 shrink-0"
                 />
                 Edinburgh College, Edinburgh, Scotland
               </div>
@@ -147,28 +105,14 @@ const clearForm = () => {
 
           <!-- Response time card -->
           <div
-            class="flex items-center gap-3 rounded-xl p-4"
-            style="
-              background-color: var(--color-lime-muted);
-              border: 1px solid var(--color-forest);
-            "
+            class="border-primary flex items-center gap-3 rounded-xl border p-4"
           >
-            <Icon
-              name="ph:clock-bold"
-              size="22"
-              style="color: var(--color-forest)"
-            />
+            <Icon name="ph:clock-bold" size="22" class="text-primary" />
             <div>
-              <p
-                class="font-display text-sm font-semibold"
-                style="color: var(--color-forest)"
-              >
+              <p class="font-heading text-primary text-sm font-semibold">
                 Typical Response Time
               </p>
-              <p
-                class="font-body mt-0.5 text-xs"
-                style="color: var(--color-body)"
-              >
+              <p class="mt-0.5 text-xs">
                 Within 2 business days, Mon–Fri 9am–5pm
               </p>
             </div>
@@ -176,117 +120,155 @@ const clearForm = () => {
         </aside>
 
         <!-- Right form -->
-        <div class="card lg:col-span-3">
-          <AppAlert
+        <UiCard class="card lg:col-span-3">
+          <UiAlert
             v-if="success"
-            variant="success"
             dismissible
             class="mb-5"
             title="Message sent!"
           >
             Thank you! Your message has been received. We will be in touch
             within 2 business days.
-          </AppAlert>
+          </UiAlert>
 
-          <form v-if="!success" novalidate @submit.prevent="handleSubmit">
-            <div class="flex flex-col gap-5">
-              <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <AppInput
-                  v-model="form.name"
-                  label="Name"
-                  placeholder="Your name"
-                  name="name"
-                  required
-                  :error="errors.name"
-                />
-                <AppInput
-                  v-model="form.email"
-                  label="Email Address"
-                  type="email"
-                  placeholder="your@email.com"
-                  name="email"
-                  required
-                  :error="errors.email"
-                />
+          <UiCardContent>
+            <form v-if="!success" @submit="onSubmit">
+              <div class="flex flex-col gap-5">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <!-- Name -->
+                  <UiFormField v-slot="{ componentField }" name="name">
+                    <UiFormItem>
+                      <UiFormLabel class="font-heading text-sm font-semibold">
+                        Name <span class="text-red-400">*</span>
+                      </UiFormLabel>
+                      <UiFormControl>
+                        <UiInputGroup>
+                          <UiInputGroupInput
+                            type="text"
+                            placeholder="John Doe"
+                            class="placeholder:text-sm"
+                            required
+                            v-bind="componentField"
+                          />
+                          <UiInputGroupAddon align="inline-start">
+                            <Icon name="ph:envelope-simple-open-bold" />
+                          </UiInputGroupAddon>
+                        </UiInputGroup>
+                      </UiFormControl>
+                      <UiFormMessage
+                        class="font-heading text-xs font-semibold"
+                      />
+                    </UiFormItem>
+                  </UiFormField>
+                  <!-- END Name -->
+                  <!-- Email -->
+                  <UiFormField v-slot="{ componentField }" name="email">
+                    <UiFormItem>
+                      <UiFormLabel class="font-heading text-sm font-semibold">
+                        Email Address <span class="text-red-400">*</span>
+                      </UiFormLabel>
+                      <UiFormControl>
+                        <UiInputGroup>
+                          <UiInputGroupInput
+                            type="email"
+                            placeholder="info@yourcompany.com"
+                            autocomplete="email"
+                            class="placeholder:text-sm"
+                            required
+                            v-bind="componentField"
+                          />
+                          <UiInputGroupAddon align="inline-start">
+                            <Icon name="ph:envelope-simple-open-bold" />
+                          </UiInputGroupAddon>
+                        </UiInputGroup>
+                      </UiFormControl>
+                      <UiFormMessage
+                        class="font-heading text-xs font-semibold"
+                      />
+                    </UiFormItem>
+                  </UiFormField>
+                  <!-- END Email -->
+                </div>
+
+                <!-- Subject -->
+                <UiFormField v-slot="{ componentField }" name="subject">
+                  <UiFormItem>
+                    <UiFormLabel class="font-heading text-sm font-semibold">
+                      Name <span class="text-red-400">*</span>
+                    </UiFormLabel>
+                    <UiFormControl>
+                      <UiInputGroup>
+                        <UiInputGroupInput
+                          type="text"
+                          placeholder="Green Calculator problem"
+                          class="placeholder:text-sm"
+                          required
+                          v-bind="componentField"
+                        />
+                        <UiInputGroupAddon align="inline-start">
+                          <Icon name="ph:envelope-simple-open-bold" />
+                        </UiInputGroupAddon>
+                      </UiInputGroup>
+                    </UiFormControl>
+                    <UiFormMessage class="font-heading text-xs font-semibold" />
+                  </UiFormItem>
+                </UiFormField>
+                <!-- END Subject -->
+
+                <!-- Message -->
+                <UiFormField v-slot="{ componentField }" name="message">
+                  <UiFormItem>
+                    <UiFormLabel class="font-heading text-sm font-semibold">
+                      Message <span class="text-red-400">*</span>
+                    </UiFormLabel>
+                    <UiFormControl>
+                      <UiTextarea
+                        type="text"
+                        placeholder="Please describe your query in detail..."
+                        class="placeholder:text-sm"
+                        rows="6"
+                        required
+                        v-bind="componentField"
+                      />
+                    </UiFormControl>
+                    <UiFormMessage class="font-heading text-xs font-semibold" />
+                  </UiFormItem>
+                </UiFormField>
+                <!-- END Message -->
+
+                <div class="flex flex-col gap-3 pt-1 sm:flex-row">
+                  <UiButton
+                    type="submit"
+                    full
+                    :loading="loading"
+                    :disabled="loading"
+                  >
+                    <Icon name="ph:paper-plane-right-bold" size="16" />
+                    Send Message
+                  </UiButton>
+                </div>
               </div>
-
-              <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <AppInput
-                  v-model="form.telephone"
-                  label="Contact Number"
-                  type="tel"
-                  placeholder="+44 131 000 0000"
-                  name="telephone"
-                />
-                <AppSelect
-                  v-model="form.category"
-                  label="Category"
-                  :options="categoryOptions"
-                  placeholder="Select a category…"
-                  name="category"
-                />
-              </div>
-
-              <AppInput
-                v-model="form.subject"
-                label="Subject"
-                placeholder="e.g. Technical Issue with Calculator"
-                name="subject"
-                required
-                :error="errors.subject"
+            </form>
+            <!-- Post-submit state: show fresh form option -->
+            <div v-else class="py-6 text-center">
+              <Icon
+                name="ph:check-circle-bold"
+                size="48"
+                class="text-primary mx-auto mb-4"
               />
-
-              <AppTextarea
-                v-model="form.message"
-                label="Message"
-                placeholder="Please describe your query in detail…"
-                name="message"
-                required
-                :rows="6"
-                :error="errors.message"
-              />
-
-              <div class="flex flex-col gap-3 pt-1 sm:flex-row">
-                <UiButton
-                  type="submit"
-                  full
-                  :loading="loading"
-                  :disabled="loading"
-                >
-                  <Icon name="ph:paper-plane-right-bold" size="16" />
-                  Send Message
-                </UiButton>
-                <UiButton type="button" variant="secondary" @click="clearForm">
-                  <Icon name="ph:broom-bold" size="15" />
-                  Clear Form
-                </UiButton>
-              </div>
+              <h3 class="font-heading mb-2 text-lg font-bold">
+                We've received your message!
+              </h3>
+              <p class="font-body text-muted mb-5 text-sm">
+                A confirmation has been sent to {{ form.values.email }}.
+              </p>
+              <UiButton variant="secondary" size="sm" @click="success = false">
+                Send Another Message
+              </UiButton>
             </div>
-          </form>
-
-          <!-- Post-submit state: show fresh form option -->
-          <div v-else class="py-6 text-center">
-            <Icon
-              name="ph:check-circle-bold"
-              size="48"
-              class="mx-auto mb-4"
-              style="color: var(--color-forest)"
-            />
-            <h3
-              class="font-display mb-2 text-lg font-bold"
-              style="color: var(--color-dark)"
-            >
-              We've received your message!
-            </h3>
-            <p class="font-body mb-5 text-sm" style="color: var(--color-muted)">
-              A confirmation has been sent to {{ form.email }}.
-            </p>
-            <UiButton variant="secondary" size="sm" @click="success = false">
-              Send Another Message
-            </UiButton>
-          </div>
-        </div>
+          </UiCardContent>
+        </UiCard>
       </div>
     </div>
-  </div>
+  </section>
 </template>

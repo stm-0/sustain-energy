@@ -8,9 +8,12 @@ export const useUserStore = defineStore("userStore", () => {
     const measurementsStore = useMeasurementsStore()
 
     await getAuthUserId()
-    if (!userCompany.value) await getUserCompany()
-
-    await measurementsStore.fetchSavedResults(userCompany.value?.id)
+    if (!userCompany.value) {
+      getUserCompany().then(
+        async () =>
+          await measurementsStore.fetchSavedResults(userCompany.value?.id),
+      )
+    }
   }
 
   async function getAuthUserId() {

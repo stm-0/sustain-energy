@@ -17,6 +17,8 @@ export const useMeasurementsStore = defineStore("measurementsStore", () => {
 
   // Last calculation user did
   const savedResults = ref<Measurement[] | null>()
+  const savedResultsDate = ref<string | undefined>()
+  const savedResultsId = ref<number | undefined>()
 
   //* Getters
   // Count completed measurements irl
@@ -73,24 +75,34 @@ export const useMeasurementsStore = defineStore("measurementsStore", () => {
     if (!companyId) return
 
     // Select last calculation for company with all its measurements on server side
-    const { data: measure_results } = await useFetch<
-      {
-        id: number
-        score: number
-      }[]
+    const measure_results = await $fetch<
+      | {
+          calculationId: number
+          createdAt: string
+          measurements: {
+            id: number
+            score: number
+          }[]
+        }
+      | undefined
     >("/api/measurements/last-save", {
       method: "GET",
-      body: {
+      query: {
         companyId: companyId,
       },
     })
 
-    if (!measure_results.value) return
+    if (!measure_results) return
 
     // Map parsed data to field
-    savedResults.value = measure_results.value.map((r) => {
-      return { id: r.id, level: measurementScoreToLevel(r.score) }
+    savedResults.value = measure_results.measurements.map((r) => {
+      return {
+        id: r.id,
+        level: r.score === 0 ? "red" : measurementScoreToLevel(r.score),
+      }
     })
+    savedResultsId.value = measure_results.calculationId
+    savedResultsDate.value = dateString(measure_results.createdAt)
   }
 
   // Sets saved results as current
@@ -102,6 +114,8 @@ export const useMeasurementsStore = defineStore("measurementsStore", () => {
 
   return {
     selections,
+    savedResults,
+    savedResultsDate,
     completed,
     isAllComplete,
     score,

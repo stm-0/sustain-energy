@@ -13,9 +13,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   rows: () => [],
 })
-
-// TODO: Create a query in supabase to fetch all recent activity:
-//        Purchases, Account Modifications, Certificates Received
 </script>
 
 <template>

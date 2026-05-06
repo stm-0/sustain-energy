@@ -19,6 +19,6 @@ export default (dateStr: string | undefined) => {
   const date = new Date(dateStr)
 
   return String(
-    date.getDay() + " " + months[date.getMonth()]! + " " + date.getFullYear(),
+    date.getDate() + " " + months[date.getMonth()]! + " " + date.getFullYear(),
   )
 }
