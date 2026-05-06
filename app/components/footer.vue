@@ -21,12 +21,14 @@ const credentials = [
     label: "Edinburgh College",
     sub: "Endorsed & Supported",
     color: "#003865",
+		link: "https://www.edinburghcollege.ac.uk",
   },
   {
     img: "/images/unesco_logo.webp",
     label: "UNESCO",
     sub: "Endorsed & Supported",
     color: "#003865",
+    link: "https://www.unesco.org/en",
   },
   {
     icon: "ph:shield-check-bold",
@@ -38,7 +40,7 @@ const credentials = [
 </script>
 
 <template>
-  <footer class="bg-foreground flex flex-col items-center text-slate-400">
+  <footer id="footer" class="bg-foreground flex flex-col items-center text-slate-400">
     <!-- Main grid -->
     <div class="container py-10">
       <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -95,9 +97,10 @@ const credentials = [
             Trust &amp; Credentials
           </h4>
           <div class="flex flex-col gap-4">
-            <div
+            <a
               v-for="cred in credentials"
               :key="cred.label"
+							:href="cred.link ?? '#footer'"
               class="flex items-center gap-3"
             >
               <div
@@ -119,7 +122,7 @@ const credentials = [
                   {{ cred.sub }}
                 </p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>
