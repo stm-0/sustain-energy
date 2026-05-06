@@ -21,7 +21,7 @@ const handleSubmit = async () => {
 
   isLoading.value = true
 
-	const subscription = await $fetch<string | undefined>("/api/subscription")
+	const subscription = await $fetch<string | undefined>("/api/subscriptions")
  
 	if (!subscription) {
 	  navigateTo("/subscription")
