@@ -21,6 +21,12 @@ const handleSubmit = async () => {
 
   isLoading.value = true
 
+	const subscription = await $fetch<string | undefined>("/api/subscription")
+ 
+	if (!subscription) {
+	  navigateTo("/subscription")
+	}
+
   // add calculations and measurements to db
   submitted.value = await $fetch<boolean>("/api/measurements", {
     method: "post",
